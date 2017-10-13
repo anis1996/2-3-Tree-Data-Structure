@@ -1,0 +1,176 @@
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+public class TwoThreeTree  {
+
+	private Node root;
+
+	public TwoThreeTree() {
+		root = null;
+	}
+	
+	public void split(Node n)
+	{
+		Node center = new Node(n.getKeys().get(1));
+		Node left = new Node(n.getKeys().get(0));
+		Node right = new Node(n.getKeys().get(2));
+		if(!n.getChildren().isEmpty())
+		{	
+			left.addChildren(n.getChildren().get(0));
+			n.getChildren().get(0).parent = left;
+			left.addChildren(n.getChildren().get(1));
+			n.getChildren().get(1).parent = left;
+			right.addChildren(n.getChildren().get(2));
+			n.getChildren().get(2).parent = right;
+			right.addChildren(n.getChildren().get(3));
+			n.getChildren().get(3).parent = right;
+		}
+		if(n == root)
+		{
+			left.parent = center;
+			right.parent = center;
+			center.children.add(left) ;
+			center.addChildren(right);
+			root = center;
+			
+			return ;
+		}else 
+		{
+			
+			if(n.parent.getKeys().size() == 1)
+			{
+				
+				n.parent.addKey(center.getKeys().get(0));
+				n.parent.addChildren(left);
+				left.parent = n.parent;
+				n.parent.addChildren(right);
+				right.parent = n.parent;
+				n.parent.children.remove(n);
+			}else
+			{
+				
+				n.parent.addKey(center.getKeys().get(0));
+				n.parent.addChildren(left);
+				left.parent = n.parent;
+				n.parent.addChildren(right);
+				right.parent = n.parent;
+				n.parent.children.remove(n);
+				
+				split(n.parent);
+			}
+		}
+	}
+
+	public boolean insert(int val) {
+		if (root == null) {
+			root = new Node(val);
+			return true;
+		}
+		Node n = search(val,root);
+	
+		if (n.getKeys().contains(val)) {
+			return false;
+		}
+		
+		n.addKey(val);
+		if(n.getKeys().size() != 2)
+		{
+			split(n);
+		}
+		return true;
+	}
+	
+	public String search(int var)
+	{
+		String s = "";
+		Node n = search(var,root);
+		s+= n.getKeys().get(0);
+		if(n.getKeys().size() == 2)
+		{
+			s+= " "+n.getKeys().get(1);
+		}
+
+			return s;
+	}
+
+	private Node search(int val, Node n) {
+
+		if (n == null) {
+			return null;
+		}
+
+		
+
+		if (n.getKeys().contains(val) || n.isLeaf()) {
+			return n;
+		} else {
+
+			if (val < n.getKeys().get(0)) {
+				return search(val, n.getChildren().get(0));
+
+			} else if (val > n.getKeys().get(0) && n.getKeys().size() == 1) {
+				return search(val, n.getChildren().get(1));
+
+			} else {
+				if (val > n.getKeys().get(1)) {
+					return search(val, n.getChildren().get(2));
+				} else {
+					return search(val, n.getChildren().get(1));
+				}
+			}
+		}
+
+	}
+
+	class Node implements Comparable {
+		ArrayList<Integer> keys;
+		ArrayList<Node> children;
+		Node parent;
+
+		Node(int x) {
+			keys = new ArrayList<Integer>(1);
+			children = new ArrayList<Node>();
+			keys.add(x);
+			parent = null;
+
+		}
+
+		void addKey(int x) {
+			keys.add(x);
+			Collections.sort(keys);
+		}
+		
+		void addChildren(Node x)
+		{
+			children.add(x);
+			Collections.sort(children);
+		}
+
+		ArrayList<Integer> getKeys() {
+			return keys;
+		}
+		
+		
+		ArrayList<Node> getChildren() {
+			return children;
+
+		}
+
+		boolean isLeaf() {
+			return children.isEmpty();
+
+		}
+
+		@Override
+		public int compareTo(Object o) {
+			Node r = (Node) o;
+			return this.getKeys().get(0).compareTo(r.getKeys().get(0));
+			
+		}
+	}
+
+	
+	
+}
